@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style type="text/css">
+	#container {
+		width: 100%;
+		height: 100%;
+	}
+	#container > div {
+		width: 49%;
+		height: 100%;
+		top: 0;
+		left: 50%;
+		position: absolute;
+		box-sizing: border-box;
+	}
+	#container > #log {
+		left: 0;
+		overflow: scroll;
+		font-family: "Courier New", "Lucida Console", Monaco, Courier, monospace;
+		font-size: 11px;
+		padding: 0 1em;
+	}
+	#html * {
+		padding: 0.1em;
+		margin: 0.1em;
+	}
+	#html, #text {
+		position: absolute;
+		height: 48% !important;
+		top: 2%;
+		position: absolute;
+		overflow: scroll;
+		border: 1px solid #ddd;
+		width: 100%;
+	}
+
+	#text {
+		top: 51% !important;
+		font-family: "Courier New", "Lucida Console", Monaco, Courier, monospace;
+	}
+
+	#cursorPos {
+		position: absolute;
+		width: 100%;
+		height: 2%;
+		left: 0;
+		top: 0;
+		z-index: 100;
+		border: 1px solid #fa8;
+		background-color: #fea;
+		font-family: "Courier New", "Lucida Console", Monaco, Courier, monospace;
+		font-size: 11px;
+	}
+
+	#html * {
+		color: #347;
+		font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "Helvetica Light", Helvetica, Arial, "Lucida Grande", sans-serif;
+		font-size: 14pt;
+		outline: none;
+		background-color: #fff;
+	}
+	#html div {
+		border: 1px solid #ff0;
+	}
+
+	#html span {
+		border: 1px solid #f8d;
+	}
+
+	#html ul, #html ol {
+		list-style-position: outside;
+	}
+
+	#html ul {
+		padding-left: 1.5em;
+	}
+	#html ul li {
+		padding-left: 0.5em;
+		border: 1px solid #f0f;
+	}
+	#html ol {
+		padding-left: 1.7em;
+	}
+	#html ol li {
+		padding-left: 0.3em;
+		border: 1px solid #0ff;
+	}
+	#html ul.checkbox {
+		padding-left: 0;
+	}
+	#html ul.checkbox > li {
+		list-style: none;
+		padding-left: 2em;
+		display: block;
+		margin-top: 0.4em;
+		position: relative;
+		border: 1px solid #f00;
+	}
+	#html ul.checkbox > li:first-child {
+		margin-top: 0;
+	}
+	#html ul.checkbox > li > img.checkbox {
+		position: absolute;
+		width: 1.3em;
+		height: 1.3em;
+		left: 0;
+		top: 0.1em;
+		background: transparent url("data:image/gif;base64,R0lGODlhNgA3AMQDAJOTk6qqqsTExPPz85qamtXV1cnJyb29veHh4d3d3aWkpObl5dDQ0Ovr6/n5+bW1taGgoNjY2LCwsM3Nzbi4uPr6+vv7+8C/v+Df3+Pj49zb2/z8/P39/Y+Pj+fm5v///yH5BAEAAAMALAAAAAA2ADcAAAX/4CCOZGmeaKqubOu+cCyz0SUpRNcBSnAUsyBDoisajwpDI8hqHI7QqE6BYKImUMXBUEh4PIjC5BIAHA9LqwgDMSoEmK98Ls8YiEUA0MpwF+iAgRp4OhdMBnkCgYuBBTk6EjMCRRAajJd0GYQBMYg6ARmYonNPOg8vGkUBC6OtXxdFBi5mHQqsrq4URRossB0Ecbi4AToQKwlFDMLCGLQTKgqQy8uTOykIOgBe08JtHbInD6bcy54EKLvkwguPCSYRU+rLuh0HJvQX8sIFxSbef/pw0TKR7VbAVsQ6RCCxoNhBXOK+kYDXIcBDV77sjejTQcLFVtUokMDS4cHHUZ5O222UdhJTyImfWmLKSMKDDgIyL0UEN6JgzkXROvAiERTgzzkLBpYodeAoHX4djJWgCMHpHHoaS9CKYNUDOx0YTtDzaLXauRMZihjNmeERgxRBLR4tdRZFWh0TfjbTsVCFJwDBWgaVuuIRhFAnI3ZwxwLZJ4MHS0l0wTFqYH30Ssao9msttwwJO86oDOACZGEGHmkOEoHWL0X7guoQoAaB7KgCEIhaMCH0r75qBjhCQoGLwQhjyhzhGXzEBNdSpKBpjoLB7ehRmVNPoUHADSMQAlwAvr28+fPo048IAQA7") left top no-repeat;
+		background-size: contain;
+		border: none !important;
+		-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+	}
+	#html ul.checkbox > li.checked > img.checkbox {
+		background-image: url("data:image/gif;base64,R0lGODlhNgA3ALMDAJTK+83m/bPY+vn6+lWt/XS6+yiX/uXx/RiQ/vH2+jug/fz8/P39/f///w6L/gAAACH5BAEAAAMALAAAAAA2ADcAAAT/cMhJq7046827/2AockJBKIbjIApRCMcoJgKh3niuALG8BYWccKhSBHwYAHE5LByRkoCCSc0hBFBldYsr+LTcsIMwCorPZBD4LE53BOy4A9A5pORs7MaMPys2cH1xdBlTgmwICRgBh0N/AwKGQoQWNo04CE8DCZY5BhgIlziUEgdEehSBog6PFGtdFnyXmRUHoY4WkpekEp1DPRIJq2MWr0KoA4yitBQBt0ukqo28A75EXhPGeG7ZW9gS2nEIwFHPTNzhQwQAd8e5XN+QXGkHuirc4GHxylTc9TgGyCUTQ0pYFUUU/qlAJsEeFYYOhWia8A/fAFlbBGIcYmBiKQICiflxaTVB2pKOHBJEZBJvgrmTHmOxiXmRC8pFbD5dEEnlZoUE7cJQm7CSY8yNVXTiDONTXp4N6YwGCzoyJVUqCAoAKMqEIQaTw0Z9iHqpAEIPZAVZ7JBWzloPAl4eGgpCyiUDXmUIuHoGwFko2eR6owl4U6SRfgunFADgBI4WLwQqnjG5suXLIiIAADs=");
+	}
+
+	#html ul.checkbox > li > img.checkbox {
+		z-index: 100;
+		cursor: pointer;
+	}
+	#html ul.checkbox > li {
+		background: transparent url("data:image/gif;base64,R0lGODlhNgA3AMQAANTU1N3d3efn5/r6+tfX1+7u7unp6eXl5fPz8/Hx8dvb2/X19ezs7Pf39/39/eHh4dnZ2e/v79/f3+vr6+Pj4/39/f39/ebl5fPy8vT09PHx8f7+/v7+/tLS0vX19f///yH5BAEAAAMALAAAAAA2ADcAAAX/4CCOZGmeaKqubOu+cCyz0SUpRNcBSnAUsyBDoisajwpDI8hqHI7QqE6BYKImUMXBUEh4PIjC5BIAHA9LqwgDMSoEmK98Ls8YiEUA0MpwF+iAgRp4OhdMBnkCgYuBBTk6EjMCRRAajJd0GYQBMYg6ARmYonNPOg8vGkUBC6OtXxdFBi5mHQqsrq4URRossB0Ecbi4AToQKwlFDMLCGLQTKgqQy8uTOykIOgBe08JtHbInD6bcy54EKLvkwguPCSYRU+rLuh0HJvQX8sIFxSbef/pw0TKR7VbAVsQ6RCCxoNhBXOK+kYDXIcBDV77sjejTQcLFVtUokMDS4cHHUZ5O222UdhJTyImfWmLKSMKDDgIyL0UEN6JgzkXROvAiERTgzzkLBpYodeAoHX4djJWgCMHpHHoaS9CKYNUDOx0YTtDzaLXauRMZihjNmeERgxRBLR4tdRZFWh0TfjbTsVCFJwDBWgaVuuIRhFAnI3ZwxwLZJ4MHS0l0wTFqYH30Ssao9msttwwJO86oDOACZGEGHmkOEoHWL0X7guoQoAaB7KgCEIhaMCH0r75qBjhCQoGLwQhjyhzhGXzEBNdSpKBpjoLB7ehRmVNPoUHADSMQAlwAvr28+fPo048IAQA7") left top no-repeat;
+		background-size: 1.3em;
+	}
+
+	#html ul.checkbox > li.checked {
+		background-image: url("data:image/gif;base64,R0lGODlhNgA3ALMAAObs8vP2+O3x9f39/dji6+Do78/b5/j5+8vY5fv8/NPe6P7+/v7+/v///8nX5KqqqiH5BAEAAAMALAAAAAA2ADcAAAT/cMhJq7046827/2AockJBKIbjIApRCMcoJgKh3niuALG8BYWccKhSBHwYAHE5LByRkoCCSc0hBFBldYsr+LTcsIMwCorPZBD4LE53BOy4A9A5pORs7MaMPys2cH1xdBlTgmwICRgBh0N/AwKGQoQWNo04CE8DCZY5BhgIlziUEgdEehSBog6PFGtdFnyXmRUHoY4WkpekEp1DPRIJq2MWr0KoA4yitBQBt0ukqo28A75EXhPGeG7ZW9gS2nEIwFHPTNzhQwQAd8e5XN+QXGkHuirc4GHxylTc9TgGyCUTQ0pYFUUU/qlAJsEeFYYOhWia8A/fAFlbBGIcYmBiKQICiflxaTVB2pKOHBJEZBJvgrmTHmOxiXmRC8pFbD5dEEnlZoUE7cJQm7CSY8yNVXTiDONTXp4N6YwGCzoyJVUqCAoAKMqEIQaTw0Z9iHqpAEIPZAVZ7JBWzloPAl4eGgpCyiUDXmUIuHoGwFko2eR6owl4U6SRfgunFADgBI4WLwQqnjG5suXLIiIAADs=");
+	}
+
+	#html h1 {
+		margin: 0.4em 0;
+		padding: 0 0.1em;
+		font-size: 110%;
+		border: 1px solid #0f0;
+	}
+	#html h1:first-child {
+		margin-top: 0.2em;
+	}
+
+</style>
+<script type="application/javascript">
+'use strict';
+
+window.location.parseSearch = function () {
+	var r = {}, s = /([^&=]+)=?([^&]*)/g, d = function ( s ) { return decodeURIComponent( s.replace( /\+/g, " " ) );}, m;
+	while ( m = s.exec( window.location.search.substring( 1 ) ) ) { r[ d( m[ 1 ] ) ] = d( m[ 2 ] ); }
+	return r;
+};
+
+( function ( w, d ) {
+
+	d.addEventListener( "DOMContentLoaded", function _onloaded () {
+		d.removeEventListener( "DOMContentLoaded", _onloaded, false );
+		w._devID = w.location.parseSearch().dID || '';
+
+		// _endBody || _error( '_endBody is undefined' );
+		var _dom = {};
+		[ 'log', 'html', 'text', 'cursorPos' ].forEach( function ( n ) { _dom[ n ] = d.getElementById( n ); } );
+
+		if ( 'WebSocket' in window ) {
+			w._logWebSocket = new WebSocket( "ws://40.dev.soft-artel.com:1234/listen/?dID=" + w._devID );
+			w._logWebSocket.onmessage = function ( ev ) {
+				var data;
+
+				console.log(ev.data);
+				try {
+
+					data = JSON.parse( ev.data );
+
+				} catch ( e ) {
+					console.log( e );
+				}
+				if ( data ) {
+					for (var key in data){
+						console.log(key+' ');
+						console.log(data[key]);
+						_dom.text.innerHTML += 'key: '+key+':'+data[key]+  '<br/>';
+					}
+					_dom.text.innerHTML += '<hr>' +'</hr>'+ '<br/>';
+					_dom.log.innerHTML += data.one    +  '<br/>';
+					_dom.log.scrollTop = _dom.log.scrollHeight;
+
+
+					_dom.html.innerHTML = data.one;
+					//_dom.text.innerHTML = data.one;
+
+					var
+						sel = w.getSelection(),
+						sr = d.createRange(),
+						n = _dom.html,
+						i;
+					sel.removeAllRanges();
+
+
+					sr.collapse( true );
+					sel.addRange( sr );
+				}
+				_dom.html.focus();
+			}
+			w._logWebSocket.onopen = function( ev ) {
+				_dom.log.innerHTML += 'Connected<br/>';
+
+			}
+			w._logWebSocket.onerror = function( ev ) {
+				_dom.log.innerHTML += 'Error, code: ' + ev.code + ', reason: ' + ev.reason + '<br/>';
+			}
+			w._logWebSocket.onclose = function( ev ) {
+				_dom.log.innerHTML += 'Closed by server, code: ' + ev.code + ', reason: ' + ev.reason + '<br/>';
+			}
+		} else {
+			_dom.log.innerHTML = 'Sorry, webSockets doesn\'t support (';
+		}
+
+	}, false );
+
+} )( window, document );
+
+</script>
+</head>
+<body>
+<div id="container">
+	<div id="log"></div>
+	<div>
+		<div id="cursorPos"></div>
+		<div id="html" contenteditable="true"></div>
+		<div id="text"></div>
+	</div>
+</div>
+<script type="application/javascript"> window._endBody = true; </script>
+</body>
+</html>

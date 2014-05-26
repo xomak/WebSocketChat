@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<style type="text/css">
+	</style>
+	<script type="application/javascript">
+		'use strict';
+
+		( function ( w, d ) {
+
+			d.addEventListener( "DOMContentLoaded", function _onloaded () {
+				d.removeEventListener( "DOMContentLoaded", _onloaded, false );
+				// _endBody || _error( '_endBody is undefined' );
+				var _dom = {};
+				[ 'list' ].forEach( function ( n ) { _dom[ n ] = d.getElementById( n ); } );
+
+				if ( 'WebSocket' in window ) {
+					try{
+					w._logWebSocket = new WebSocket( "ws://40.dev.soft-artel.com:1234/list/" );
+					w._logWebSocket.onmessage = function ( ev ) {
+						var data;
+						try {
+							data = JSON.parse( ev.data );
+							console.log(ev.data);
+							console.log(data);
+							for ( a in data ) {
+								console.log(data[a].connected);
+
+							}
+
+						} catch ( e ) {
+							console.log( e );
+						}
+						if ( data ) {
+
+							var h = [], a;
+							for ( a in data ) {
+								console.log(a.devName);
+
+								var color = (data[a].connected==1) ? "style=background-color:#009933" : "style=background-color:#ff110c";
+
+
+								h.push( '<a s '+color+' href="?dID=' + a + '">' + (data[ a ]).devName + ' [' + a + ']' + '</a><br/>' );
+
+							}
+							if ( h.length ) {
+								_dom.list.innerHTML = h.join( '' );
+							} else {
+								_dom.list.innerHTML = 'No active RichEditors';
+							}
+						}
+					}
+					w._logWebSocket.onopen = function( ev ) {
+						_dom.list.innerHTML += 'Connected<br/>';
+					}
+					w._logWebSocket.onerror = function( ev ) {
+						_dom.list.innerHTML += 'Error, code: ' + ev.code + ', reason: ' + ev.reason + '<br/>';
+					}
+					w._logWebSocket.onclose = function( ev ) {
+						_dom.list.innerHTML += 'Closed by server, code: ' + ev.code + ', reason: ' + ev.reason + '<br/>';
+					}
+					///
+				}catch (err){alert("error"+err.message);}
+				} else {
+					_dom.list.innerHTML = 'Sorry, webSockets doesn\'t support (';
+				}
+
+			}, false );
+
+		} )( window, document );
+
+	</script>
+</head>
+<body>
+<div id="list">
+</div>
+<script type="application/javascript"> window._endBody = true; </script>
+</body>
+</html>
