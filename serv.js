@@ -14,6 +14,7 @@ var
 	connectedDevs = {},
 	logReceiver1 = fs.readFileSync( 'logReceiver1.html' ),
 	logDevList1 = fs.readFileSync( 'logDevList1.html' ),
+	testilka= fs.readFileSync('testformodule.html'),
 
 	_sendLisOfDevs = function () {
 		listWs.forEach( function ( _ws ) { try { _ws.send( JSON.stringify( connectedDevs ) ); } catch ( e ) { console.log( e ); } } );
@@ -28,7 +29,6 @@ redClient.on( "error" , function(err){
 	console.log( "Redis client error " + err );
 })
 
-redClient.set("1","222222222222");
 
 console.log( 'Started...' );
 
@@ -51,25 +51,36 @@ http.createServer( function ( req, res ) {
 
 	var up = url.parse( req.url, true ),
 		dID = up.query.dID,
-		tRunID = up.query.tRunID;
-
-	if( up.pathname == '/aj/tid' ){
-		res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
+		tRunID = up.query.tRunID,
+		test =up.query.TEST;
+	console.log("up pathname",up.pathname);
+	if( up.pathname == '/aj/tid' || up.pathname == '/40.dev.soft-artel.com:1234/aj/tid' ){
 
 		var args = [dID,new Date().getTime()-86400000*2,new Date().getTime()-86400000];
 		redClient.zremrangebyscore(args,function(err,response){
 			if(err) throw err;
-
 		});
-		redClient.zrange( dID,0,-1, function(err,reply){
-			res.end( reply );
+
+		res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
+		var args1 = [ dID, '+inf', '-inf' ];
+		redClient.zrevrangebyscore(args1, function (err, response) {
+			if (err)
+				{
+					throw err;
+					res.end("NODATA");
+				};
+			console.log('example 1', response);
+			res.end(response.toString());
+			//res.end( response );
+			// write your code here
 		});
 		return;
 	}
-	if( up.pathname == '/aj/logs'){
+
+	if( up.pathname == '/aj/logs' || up.pathname == '/40.dev.soft-artel.com:1234/aj/logs' ){
 		res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
 		redClient.get( tRunID, function(err,reply){
-			res.end( reply );
+			res.end( reply.toString() );
 		});
 		return;
 	}
@@ -80,8 +91,12 @@ http.createServer( function ( req, res ) {
 	,'Access-Control-Allow-Headers':'X-Requested-With'
 	} );
 
-	res.end( dID ? logReceiver1 : logDevList1 );
-
+	if(test!=1){
+		res.end( dID ? logReceiver1 : logDevList1 );
+	}
+	else{
+		res.end(testilka);
+	}
 } ).listen( httpport );
 console.log( 'Http Begin listening :' + httpport );
 /*
@@ -124,12 +139,10 @@ wsServer.on( 'connection', function ( ws ) {
 		dID = up.query.dID,
 		tRunId = up.query.tRunID,
 		role = up.path.split( '/' )[ 1 ] || 'listen';
-	var uniqueRedIDKeyLogs = tRunId ;
 
 	if( tRunId ){
-		redClient.append ( dID + ":tRunID", tRunId ) ;
 		var args = [ dID, new Date().getTime(), tRunId ];
-		redclient.zadd(args, function (err, response) {
+		redClient.zadd(args, function (err, response) {
 			if (err) throw err;
 		});
 	}
@@ -153,12 +166,14 @@ wsServer.on( 'connection', function ( ws ) {
 			console.log( 'Device ' + dID + ' connected' );
 			_sendLisOfDevs();
 			ws.on( 'message', function( json ) {
+				//console.log(json);
 				if ( !dID ) { ws.close(); return; }
 				if ( !logWs[ dID ] ) {
 					console.log( 'wtf1?' );
 					logWs[ dID ] = { listeners : [] };
 					connectedDevs[ dID ] = up.query.dName || '';
 				} else {
+					console.log( "TRUNID" + tRunId );
 					redClient.append( tRunId , json + "|delimiter|" );
 					redClient.expire( tRunId, new Date().getTime() );
 					logWs[ dID ].listeners.forEach( function ( _ws ) {
@@ -187,7 +202,7 @@ wsServer.on( 'connection', function ( ws ) {
 		break;
 
 		default :
-			if ( !dID ) { ws.close(); return; }
+			//if ( !dID ) { ws.close(); return; }
 			if ( !logWs[ dID ] ) {
 				logWs[ dID ] = { listeners : [ ws ] };
 			} else {
