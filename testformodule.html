@@ -8,10 +8,10 @@
 
 			return {
 
-				fgetLogst   : function(tRunID,callback) {
+				fgetLogst   : function( tRunID, callback ) {
 					var url = "40.dev.soft-artel.com:1234/aj/logs?tRunID" + tRunID;
 					var ajaxOb = typeof XMLHttpRequest != 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-					ajaxOb.open('POST',url,true);
+					ajaxOb.open('POST', url, true);
 					ajaxOb.onreadystatechange = function(){
 						if ( ajaxOb.readyState != 4 ) return;
 						if ( ajaxOb.readyState == 4 )
@@ -22,10 +22,10 @@
 					}
 					ajaxOb.send(null);
 				},
-				fgetRunID   : function(dID,callback) {
+				fgetRunID   : function( dID, callback ) {
 					var url = "40.dev.soft-artel.com:1234/aj/tid?dID=" + dID;
 					var ajaxOb = typeof XMLHttpRequest != 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-					ajaxOb.open('POST',url,true);
+					ajaxOb.open( 'POST' , url, true );
 					ajaxOb.onreadystatechange = function(){
 						if (ajaxOb.readyState != 4 ) return;
 						if (ajaxOb.readyState == 4 )
@@ -46,27 +46,27 @@
 									var data;
 									try {
 										data = JSON.parse( ev.data );
-										callback(ev.data );
+										callback( ev.data );
 									} catch ( e ) {
 										console.log( e );
 									}
 									if ( data ) {
-										callback(data);
+										//callback( data );
 									}
 								}
 								w._logWebSocket.onopen = function( ev ) {
-									console.log('Connected');
+									console.log('List Connected');
 								}
 								w._logWebSocket.onerror = function( ev ) {
-									console.log('Error, code: ' + ev.code + ', reason: ' + ev.reason );
+									console.log('LIST Error, code: ' + ev.code + ', reason: ' + ev.reason );
 								}
 								w._logWebSocket.onclose = function( ev ) {
-									console.log('Closed by server, code: ' + ev.code + ', reason: ' + ev.reason  );
+									console.log('LIST Closed by server, code: ' + ev.code + ', reason: ' + ev.reason  );
 								}
-								///
-							}catch (err){alert("error"+err.message);}
+
+							}catch (err){ alert( "List error" + err.message );}
 						} else {
-							console.log('Sorry, webSockets doesnt support ') ;
+							console.log( ' Sorry, webSockets doesnt support ') ;
 						}
 
 					}, false )},
@@ -74,17 +74,15 @@
 
 					d.addEventListener( "DOMContentLoaded", function _onloaded () {
 						d.removeEventListener( "DOMContentLoaded", _onloaded, false );
-						w._devID = moduleMain.parseSearch(w).dID || '';
+						//w._devID = moduleMain.parseSearch(w).dID || '';
 
 						if ( 'WebSocket' in window ) {
-							w._logWebSocket = new WebSocket( "ws://40.dev.soft-artel.com:1234/listen/?dID="+devID1);
+							w._logWebSocket = new WebSocket( "ws://40.dev.soft-artel.com:1234/listen/?dID=" + devID1 );
 							w._logWebSocket.onmessage = function ( ev ) {
 								var data;
-
-								console.log(ev.data);
+								console.log( ev.data );
 								try {
-
-									callback(ev.data );
+									callback( ev.data );
 									data = JSON.parse( ev.data );
 								} catch ( e ) {
 									console.log( e );
@@ -96,19 +94,18 @@
 
 							}
 							w._logWebSocket.onopen = function( ev ) {
-								console.log('Connected');
+								console.log( 'Receiver Connected' );
 							}
 							w._logWebSocket.onerror = function( ev ) {
-								console.log('Error, code: ' + ev.code + ', reason: ' + ev.reason + '')
+								console.log( 'Receiver Error, code: ' + ev.code + ', reason: ' + ev.reason + '');
 
 							}
 							w._logWebSocket.onclose = function( ev ) {
-								console.log('Connected')
+								console.log('Receiver DisConnected');
 
 							}
 						} else {
-							console.log('Connected')
-
+							console.log('Connected');
 						}
 
 					}, false );
@@ -123,20 +120,19 @@
 			}
 		} ()	);
 
-
 	</script>
 </head>
 <body>
 <script type="application/javascript">
 
-	moduleMain.LogDevList(window,document,function(a){
+	moduleMain.LogDevList( window,document,function(a){
 		console.log("LOGDEVLIST" + a );
 	});
 	var did="c41794a1-cf23-457e-aab4-e9ca91a04688";
-	moduleMain.LogReceiver(window,document,did,function(a){
+	moduleMain.LogReceiver( window,document,did,function(a){
 		console.log("LOGDEVRECEIVER" + a );
 	})
-	moduleMain.fgetRunID(1,function(a){
+	moduleMain.fgetRunID( 1, function(a){
 		console.log("LOGGETDEVID " +a );
 	})
 
