@@ -1,16 +1,13 @@
 $(function () {
 	"use strict";
-
 // for better performance - to avoid searching in DOM
 	var content = $('#content');
 	var input = $('#input');
 	var status = $('#status');
-
 // my color assigned by the server
 	var myColor = false;
 // my name sent to the server
 	var myName = false;
-
 // if user is running mozilla then use it's built-in WebSocket
 	window.WebSocket = window.WebSocket || window.MozWebSocket;
 
@@ -24,7 +21,7 @@ $(function () {
 	}
 // open connection
 	//test
-	var connection = new WebSocket('ws://40.dev.soft-artel.com:80');
+	var connection = new WebSocket('ws://40.dev.soft-artel.com:1234/send/?devID=123&devName=321');
 
 	connection.onopen = function () {
 // first we want users to enter their names
@@ -46,6 +43,7 @@ $(function () {
 	};
 // most important part - incoming messages
 	connection.onmessage = function (message) {
+		input.removeAttr('disabled').focus();
 // try to parse JSON message. Because we know that the server always returns
 // JSON this should work without any problem but we should make sure that
 // the massage is not chunked or otherwise damaged.
@@ -58,7 +56,7 @@ $(function () {
 
 // NOTE: if you're not sure about the JSON structure
 // check the server source code above
-		if (json.type === 'color') { // first response from the server with user's color
+		if (json.type != 'color') { // first response from the server with user's color
 			myColor = json.data;
 			status.text(myName + ': ').css('color', myColor);
 			input.removeAttr('disabled').focus();
@@ -77,7 +75,7 @@ $(function () {
 			console.log('Hmm..., I\'ve never seen JSON like this: ', json);
 		}
 	};
-	
+
 	/**
 	 * Send mesage when user presses Enter key
 	 */
@@ -88,11 +86,15 @@ $(function () {
 				return;
 			}
 // send the message as an ordinary text
-			connection.send(msg);
+			var messaga={"one":msg,"two":"logggs"};
+
+
+			connection.send(JSON.stringify(messaga) );
+
 			$(this).val('');
 // disable the input field to make the user wait until server
 // sends back response
-			input.attr('disabled', 'disabled');
+			//input.attr('disabled', 'disabled');
 
 // we know that the first message sent from a user their name
 			if (myName === false) {

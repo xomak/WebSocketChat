@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="author" content="Aivory Tugade">
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>Chat Clients</title>
+
+	<!-- Use jQuery hosted by Google -->
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script>
+
+
+		$(document).ready(function() {
+			var connection = {};
+			$("#submit_name").click(function(e) {
+				if(this.value == "Connect") {
+					name = $('#input_name').val();
+					if(name == '') {
+						alert('Please enter your name.')
+					}
+					else {
+						connect(name);
+					}
+				} else {
+					connection.close();
+				}
+			});
+
+			$("#submit_line").click(function(e) {
+				submit_line();
+			});
+
+			//When Enter Key is pressed
+			$(document).keypress(function(e) {
+				if(e.which == 13) {
+					submit_line();
+				}
+			});
+
+			//Sends line to chat server
+			function submit_line() {
+				line = $('#input_line').val();
+				if(line != "") {
+					connection.send(line);
+					$('#input_line').val("");
+				}
+			}
+
+			function connect(name) {
+				connection = new WebSocket('ws://40.dev.soft-artel.com:1234');
+
+				// Upon connection open
+				connection.onopen = function () {
+					//Tell chat server who we are
+					connection.send("connect_name:"+ name);
+
+					//Change Connect Button to Disconnect
+					$('#submit_name').attr('value', 'Disconnect');
+					$('#submit_name').css('background-color', '#5AB55A');
+					$('#submit_name').css('color', 'white');
+
+					$('#submit_name').css('margin-right', '15px');
+					$('#submit_name').css('border-radius', '5px');
+
+					$('#input_name').css("display",'none');
+					$('#name').text($('#input_name').val());
+
+					$('#input_name').attr("disabled",true);
+					$('#input_line').attr("disabled",false);
+					$('#submit_line').attr("disabled",false);
+					$('#chat_log').text('');
+
+				};
+
+				// Log errors
+				connection.onerror = function (error) {
+					console.log('WebSocket Error ' + error);
+				};
+
+				// Log messages from the server
+				connection.onmessage = function (e) {
+					console.log('Server: ' + e.data);
+					$('#chat_log').append(e.data +'<br>');
+					$('#chat_log').scrollTop($(document).height());
+				};
+
+				// Upon closing the connection
+				connection.onclose = function () {
+					// Change Disonnect Button to Connect
+					$('#submit_name').attr('value', 'Connect');
+					$('#submit_name').removeAttr('style');
+					$('#submit_name').css('margin-right', '12px');
+
+					$('#name').text('');
+					$('#input_name').val('');
+
+					$('#input_name').attr("disabled",false);
+					$('#input_name').css("display",'block');
+
+					$('#input_line').attr("disabled",true);
+					$('#submit_line').attr("disabled",true);
+					$('#chat_log').append('<br><b>Thank you for using Simple Chat. Goodbye. </b>');
+					$('#chat_log').scrollTop($(document).height());
+				};
+			}
+		});
+	</script>
+
+	<style>
+		#chat {
+			width:400px;
+			height:370px;
+			margin:2% auto;
+			border:1px solid #B1B1B1;
+			border-radius:3px;
+		}
+
+		#name_panel {
+			background-color:#FAFAFA;
+			height:42px;
+		}
+
+		#name_field {
+			float:left;
+			height:100%;
+		}
+
+		#input_name {
+			margin:2px 0 0 10px;
+			font-size:15px;
+			width:200px;
+			float:left;
+		}
+
+		#name {
+			margin:7px 0 0 10px;
+			color:red;
+			font-weight:bold;
+			font-size:22px;
+		}
+
+		#submit_name {
+			margin:10px 12px;
+			float:right;
+			background-color:#FFFFFF;
+			border:1px solid #B1B1B1;
+			border-radius:5px;
+			padding:3px 8px;
+
+		}
+
+		#chat_log {
+			box-sizing:border-box;
+			-moz-box-sizing:border-box;
+			padding:5px;
+			border:1px solid #F7F7F7;
+			width:400px;
+			height:280px;
+			float:left;
+			overflow-y: scroll;
+		}
+
+		#input_panel {
+			padding-top:6px;
+			height:42px;
+			float:left;
+			background-color:#FAFAFA;
+			width:100%;
+		}
+
+		#input_line {
+			height:20px;
+			float:left;
+			font-size:15px;
+			margin:5px 0 0 5px;
+			width:310px;
+		}
+
+		#submit_line {
+			background-color:#4488F6;
+			border:1px solid #3079ED;
+			border-radius:2px;
+			color:white;
+			float:right;
+			margin:5px 10px 0px 0px;
+			padding:5px 10px;
+		}
+
+	</style>
+</head>
+<body>
+<div id="chat">
+	<div id="name_panel">
+		<div id="name_field">
+			<div id="name"></div>
+			<input type="text" id="input_name" placeholder="Enter your name">
+		</div>
+		<input id="submit_name" type="submit" value="Connect"></input>
+	</div>
+	<div id="chat_log"></div>
+	<div id="input_panel">
+		<input id="input_line" type="text" name="input_text" disabled>
+		<input id="submit_line" type="submit" value="Send" disabled></input>
+	</div>
+</div>
+
+</body>
+
+</html>

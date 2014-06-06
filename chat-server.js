@@ -1,11 +1,7 @@
-// http://ejohn.org/blog/ecmascript-5-strict-mode-json-and-more/
 "use strict";
-
-// Optional. You will see this name in eg. 'ps' or 'top' command
+//You will see this name in eg. 'ps' or 'top' command
 process.title = 'node-chat';
-
-// Port where we'll run the websocket server
-var webSocketsServerPort = 80;
+var webSocketsServerPort = 1234;
 
 // websocket and http servers
 var webSocketServer = require('websocket').server;
@@ -36,12 +32,16 @@ colors.sort(function(a,b) { return Math.random() > 0.5; } );
  * HTTP server
  */
 var server = http.createServer(function(request, response) {
+
+
+
 	var uri=url.parse(request.url).pathname;
 	var filename=path.join(process.cwd(),uri);
 
 	path.exists(filename,function(exists){
 		if(!exists) {
 			response.writeHead(404, {"Content-Type": "text/plain"});
+			response.write(uri);
 			response.write("404 Not Found\n");
 			response.end();
 			return;
