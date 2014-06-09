@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel='stylesheet' href='http://log.bossnote.ru/framework/prettyCheckable/prettyCheckable.css'> <script type='text/javascript' src='http://log.bossnote.ru/framework/prettyCheckable/prettyCheckable.min.js'></script>
+	<link rel='stylesheet' href='http://log.bossnote.ru/framework/silviomoreto-bootstrap-select-1.5.2-22/bootstrap-select.css'> <script type='text/javascript' src='http://log.bossnote.ru/framework/silviomoreto-bootstrap-select-1.5.2-22/bootstrap-select.js'></script>
+	<link rel='stylesheet' href='http://log.bossnote.ru/framework/bootstrap3-editable/css/bootstrap-editable.css'> <script type='text/javascript' src='http://log.bossnote.ru/framework/bootstrap3-editable/js/bootstrap-editable.js'></script>
+	<link rel='stylesheet' href='http://log.bossnote.ru/framework/editableSelect2/select2.css'><link rel='stylesheet' href='http://log.bossnote.ru/framework/editableSelect2/select2-bootstrap.css'> <script type='text/javascript' src='http://log.bossnote.ru/framework/editableSelect2/select2.js'></script>
+	<link rel='stylesheet' href='http://log.bossnote.ru/framework/bootstrap-3/css/bootstrap.min.Lumen.css' type='text/css'/>
+	<script type='text/javascript' src='http://log.bossnote.ru/framework/jquery/jquery-1.11.0.min.js'></script>
+	<script type='text/javascript' src='http://log.bossnote.ru/framework/bootstrap-3/js/bootstrap.js'></script>
+	<script type='text/javascript' src='http://log.bossnote.ru/framework/js/function.js'></script>
+
+	<title>LogsViewer</title>
+
+	<script type="text/javascript" src="http://178.205.251.228:8080/ticket/view/requireFrontend/jquery/jquery.js"> </script>
+	<link href="http://178.205.251.228:8080/ticket/view/requireFrontend/bootstrap-2/bootstrap.min.css" rel="stylesheet" media="screen">
+	<script type="text/javascript" src="http://178.205.251.228:8080/ticket/view/requireFrontend/bootstrap-2/bootstrap.min.js"></script>
+	<script type="text/javascript" src="http://178.205.251.228:8080/ticket/view/requireFrontend/jquery.tablesorter/jquery.tablesorter.js"> </script>
+	<script type="text/javascript" src="http://178.205.251.228:8080/ticket/view/requireFrontend/jquery.tablesorter/jquery.tablesorter.widgets.js"> </script>
+	<script type="text/javascript" src="http://178.205.251.228:8080/ticket/view/requireFrontend/js/function.js"> </script>
+	<link href="http://178.205.251.228:8080/ticket/view/requireFrontend/jquery.tablesorter/theme.blue.css" rel="stylesheet">
+
+	<link rel="stylesheet" type="text/css" href="http://178.205.251.228:8080/ticket/view/requireFrontend/datetimepicker/bootstrap-datetimepicker.min.css" type="text/css"/>
+	<script src="http://178.205.251.228:8080/ticket/view/requireFrontend/datetimepicker/bootstrap-datetimepicker.min.js" type="text/javascript" ></script>
+	<script type="text/javascript" src="http://178.205.251.228:8080/ticket/view/requireFrontend/bootstrap-2/bootstrap-multiselect.js"></script>
+	<link rel="stylesheet" href="http://178.205.251.228:8080/ticket/view/requireFrontend/bootstrap-2/bootstrap-multiselect.css" type="text/css"/>
+	<link rel='stylesheet' href='http://log.bossnote.ru/framework/bootstrap3-editable/css/bootstrap-editable.css'>
+	<script type='text/javascript' src='http://log.bossnote.ru/framework/bootstrap3-editable/js/bootstrap-editable.js'></script>
+	<style>
+		*{margin:0px;padding:0px;}
+		.select{padding: 4px; border-radius:10px;position:relative;width:100%;height:20px;background:#fff;border:1px solid #bbb;z-index:1;}
+		.select > span{ display:block;width:100px;height:20px;vertical-align:middle;cursor:pointer;}
+		.select_{display:none;position:absolute;padding-right:20px;max-height:100px;background:#fff;border:1px solid #bbb;overflow:auto;}
+		.select_ > div{white-space:nowrap}
+		.select:hover{z-index:100;}
+		.select:hover > .select_{display:block;}
+
+	</style>
+
+	<script type="text/javascript">
+	"use strict";
+
+	var message='';
+
+	function managerGrid(settings){ //управление таблицей
+
+		this.countMax=1000;
+		this.arrayConsecution=[];
+		this.objectData={};
+		this.arrayColumn=[];
+		this.countRow=0;
+		this.countShowRow=0;
+		if(!settings.pointerDOMTable){
+			console.log('Error settings pointerDOMTable');
+			return false;
+		}
+
+		this.poiterDOMTable = settings.pointerDOMTable;
+		if(!settings.settingsHeadTable){
+			console.log('Error settings settingsHeadTable');
+			return false;
+		}
+		this.settingsHeadTable = settings.settingsHeadTable;
+		this.initHead=function(){
+			var pointterDOM=this.poiterDOMTable.querySelector('thead'), html='', td, nameDefault,arrayColumn=[];
+
+			if(!pointterDOM){
+
+				pointterDOM=document.createElement('thead');
+				this.poiterDOMTable.insertBefore(pointterDOM,this.poiterDOMTable.lastChild);
+
+			}
+			pointterDOM.innerHTML='<tr></tr>';
+			pointterDOM=pointterDOM.firstChild;
+			for(var nameColumn in this.settingsHeadTable){
+
+				if(this.settingsHeadTable[nameColumn].settings){
+					td=document.createElement('td');
+					arrayColumn.push(nameColumn);
+					if(this.settingsHeadTable[nameColumn].defaultNameColumn){
+						nameDefault=this.settingsHeadTable[nameColumn].defaultNameColumn
+					}else{
+
+						nameDefault='<span>'+nameColumn+'</span>' +
+								'<div>' +
+								'<a href="#" id="'+nameColumn+'" data-pk="1"></a>'+
+								'</div>';
+
+
+					}
+					td.innerHTML=nameDefault;
+					pointterDOM.appendChild(td);
+
+					$(td.querySelector('a')).editable(this.settingsHeadTable[nameColumn].settings);
+
+
+				}
+
+			}
+			this.arrayColumn=arrayColumn;
+			if(settings.data)this.setData(settings.data);
+		}
+		this.insertRowDom=function(data,id){
+
+			var tr=document.createElement('tr'), o, html='';
+
+			tr.setAttribute('id',id);
+
+			for(o=0;o<this.arrayColumn.length;o++){
+
+				html+='<td>'+data[this.arrayColumn[o]]+'</td>';
+
+			}
+			tr.innerHTML=html;
+			console.log(html);
+			this.poiterDOMTable.appendChild(tr);
+			return tr;
+
+		}
+		this.showData=function(){
+			var o,i= 0, k,ii;
+
+			for(ii=0;ii<this.arrayConsecution.length;ii++){
+
+
+
+				if(ii>this.countMax && this.objectData[this.arrayConsecution[ii]].pointerDOM ){
+
+					k =document.getElementById(this.arrayConsecution[ii]);
+					k.parentNode.removeChild(k);
+					delete his.objectData[this.arrayConsecution[ii]];
+					delete this.arrayConsecution[ii];
+					continue;
+				}
+
+				o=this.arrayConsecution[ii];
+
+				if( !this.objectData[o].pointerDOM){
+
+					this.objectData[o].pointerDOM=this.insertRowDom( this.objectData[o].data,o);
+
+				}
+
+				if( this.objectData[o] ){
+
+					this.objectData[o].pointerDOM.style.display='table-row';
+					this.objectData[o].flagShowRow=true;
+
+					i++;
+				} else{
+
+					this.objectData[o].pointerDOM.style.display='none';
+					this.objectData[o].flagShowRow=false;
+
+
+				}
+
+
+
+			}
+			this.countShowRow=i;
+			this.countRow=ii;
+
+		}
+		this.setData=function(data,begin_end){
+
+			for(var o in data){
+
+				if(!this.objectData[o] ){
+
+					this.objectData[o]={ "data":data[o], "flagShowRow":false , "pointerDOM":null };
+
+
+					if(begin_end){
+						this.arrayConsecution.unshift(o);
+
+					}else{
+						this.arrayConsecution.push(o);
+					}
+
+				}
+
+			}
+
+			this.showData();
+		}
+		this.initHead();
+
+	}
+
+	</script>
+</head>
+
+<body>
+
+<div class="row-fluid" style="overflow: hidden;overflow-y: scroll;">
+	<table class="table table-bordered" id="myTable">
+		<!-- <thead><tr>-->
+		<!-- <td>date</td>-->
+		<!-- <td>logLevel</td>-->
+		<!-- <td>message</td>-->
+		<!-- <td>queue</td>-->
+		<!-- <td>data</td>-->
+		<!-- <td>class</td>-->
+		<!-- <td>method</td>-->
+		<!-- <td>line</td>-->
+		<!-- <td> memoryUsed</td>-->
+		<!-- <td>mvc</td></tr>-->
+		<!-- </thead>-->
+		<!-- <tbody id="tabletLogs" ></tbody>-->
+	</table>
+</div>
+
+
+<script type="text/javascript">
+	"use strict";
+
+	var tLogs;
+	$(document).ready(function(){
+		var grid = new managerGrid({
+			"pointerDOMTable":document.getElementById('myTable'),
+			"data":tLogs,
+			"settingsHeadTable": {
+				"date":{
+					"settings":{
+						"type":"text",
+						mode:'inline',
+						"emptytext":'all',
+						emptyclass:'editable editable-click'
+					},
+					"defaultNameColumn":false
+				},
+				"logLevel":{
+					"settings":{ "type":"text",
+						mode:'inline',
+						"emptytext":'all',
+						emptyclass:'editable editable-click'
+					},
+					"defaultNameColumn":false
+				},
+				"message":{
+					"settings":{
+						"type":"text",
+						mode:'inline',
+						"emptytext":'all',
+						emptyclass:'editable editable-click'
+					},
+					"defaultNameColumn":false
+				},
+				"queue":{
+					"settings":{
+						"type":"text",
+						mode:'inline',
+						"emptytext":'all',
+						emptyclass:'editable editable-click'
+					},
+					"defaultNameColumn":false
+				},
+				"data":{
+					"settings":{
+						"type":"text",
+						mode:'inline',
+						"emptytext":'all',
+						emptyclass:'editable editable-click'
+					},
+					"defaultNameColumn":false
+				},
+				"class":{
+					"settings":{
+						"type":"text",
+						mode:'inline',
+						"emptytext":'all',
+						emptyclass:'editable editable-click'
+					},
+					"defaultNameColumn":false
+				},
+				"method":{
+					"settings":{
+						"type":"text",
+						mode:'inline',
+						"emptytext":'all',
+						emptyclass:'editable editable-click'
+					},
+					"defaultNameColumn":false
+				},
+				"line":{
+					"settings":{
+						"type":"text",
+						mode:'inline',
+						"emptytext":'all',
+						emptyclass:'editable editable-click'
+					},
+					"defaultNameColumn":false
+				},
+				"memoryUsed":{
+					"settings":{ "type":"text",
+						mode:'inline',
+						"emptytext":'all',
+						emptyclass:'editable editable-click'
+					},
+					"defaultNameColumn":false
+				},
+				"mvc":{
+					"settings":{
+						"type":"text",
+						mode:'inline',
+						"emptytext":'all',
+						emptyclass:'editable editable-click'
+					},
+					"defaultNameColumn":false
+				}
+			}
+		});
+
+		console.log(grid);
+
+		var listResultCodeError= $('.multiselect').multiselect({
+			includeSelectAllOption:true,
+			selectAllText:'select all',
+			selectAllValue:'AllResultCode',
+
+			onChange: function(element, checked) {
+				if(checked){
+					filtr.logLevel[element[0].value]=element[0].value;
+
+				}else{
+
+					delete filtr.logLevel[element[0].value];
+				}
+				search();
+
+			},
+			numberDisplayed:2
+		});
+
+		listResultCodeError= $('.multiselectMVC').multiselect({
+			includeSelectAllOption:true,
+			selectAllText:'select all',
+			selectAllValue:'AllResultCode',
+
+
+			numberDisplayed:2
+		});
+//showtLog(tLogs);
+	});
+</script>
+<script type="text/javascript">
+	"use strict";
+	var tLogs;
+
+	try{
+
+		tLogs="";
+		var e={};
+		for(var o=0;o<tLogs.length;o++){
+			e[o]={"date":tLogs[o][0],
+				"logLevel":tLogs[o][1],
+				"message":tLogs[o][2],
+				"queue":tLogs[o][3],
+				"data":JSON.stringify(tLogs[o][4]),
+				"class":tLogs[o][5],
+				"method":tLogs[o][6],
+				"line":tLogs[o][7],
+				"memoryUsed":tLogs[o][8],
+				"mvc":tLogs[o][9]};
+		}
+		tLogs=e;
+
+	}catch (e){
+		message='JSON error';
+		document.getElementById('message').innerHTML=message;
+
+	}
+</script>
+</body>
+</html>
+
+
+
+
