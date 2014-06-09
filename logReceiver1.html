@@ -35,12 +35,10 @@
 		border: 1px solid #ddd;
 		width: 100%;
 	}
-
 	#text {
 		top: 51% !important;
 		font-family: "Courier New", "Lucida Console", Monaco, Courier, monospace;
 	}
-
 	#cursorPos {
 		position: absolute;
 		width: 100%;
@@ -53,7 +51,6 @@
 		font-family: "Courier New", "Lucida Console", Monaco, Courier, monospace;
 		font-size: 11px;
 	}
-
 	#html * {
 		color: #347;
 		font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "Helvetica Light", Helvetica, Arial, "Lucida Grande", sans-serif;
@@ -64,15 +61,12 @@
 	#html div {
 		border: 1px solid #ff0;
 	}
-
 	#html span {
 		border: 1px solid #f8d;
 	}
-
 	#html ul, #html ol {
 		list-style-position: outside;
 	}
-
 	#html ul {
 		padding-left: 1.5em;
 	}
@@ -150,12 +144,11 @@ window.location.parseSearch = function () {
 };
 
 ( function ( w, d ) {
-
 	d.addEventListener( "DOMContentLoaded", function _onloaded () {
 		d.removeEventListener( "DOMContentLoaded", _onloaded, false );
 		w._devID = w.location.parseSearch().dID || '';
 
-		// _endBody || _error( '_endBody is undefined' );
+
 		var _dom = {};
 		[ 'log', 'html', 'text', 'cursorPos' ].forEach( function ( n ) { _dom[ n ] = d.getElementById( n ); } );
 
@@ -163,41 +156,43 @@ window.location.parseSearch = function () {
 			w._logWebSocket = new WebSocket( "ws://40.dev.soft-artel.com:1234/listen/?dID=" + w._devID );
 			w._logWebSocket.onmessage = function ( ev ) {
 				var data;
-
-				console.log(ev.data);
+				var formedForView="";
+				console.log( ev.data );
 				try {
-
 					data = JSON.parse( ev.data );
-
 				} catch ( e ) {
 					console.log( e );
 				}
 				if ( data ) {
-					for (var key in data){
-						console.log(key+' ');
-						console.log(data[key]);
-						_dom.text.innerHTML += 'key: '+key+':'+data[key]+  '<br/>';
+					for ( var key in data ){
+						console.log( key+' ' );
+						console.log( data[key] );
+
+						formedForView += 'key: ' + key + ':' + data[key] + '<br/>';
+						//_dom.text.innerHTML += 'key: '+key+':'+data[key]+  '<br/>';
 					}
-					_dom.text.innerHTML += '<hr>' +'</hr>'+ '<br/>';
-					_dom.log.innerHTML += data.one    +  '<br/>';
-					_dom.log.scrollTop = _dom.log.scrollHeight;
+				var li = document.createElement('spisok');
+				li.innerHTML=formedForView;
+				_dom.text.appendChild(li);
+					//_dom.text.innerHTML += '<hr>' +'</hr>'+ '<br/>';
+					//_dom.log.innerHTML += data.one    +  '<br/>';
+					//_dom.log.scrollTop = _dom.log.scrollHeight;
 
-
-					_dom.html.innerHTML = data.one;
+					//dom.html.innerHTML = data.one;
 					//_dom.text.innerHTML = data.one;
 
 					var
 						sel = w.getSelection(),
 						sr = d.createRange(),
-						n = _dom.html,
-						i;
+						n = _dom.html;
+
 					sel.removeAllRanges();
-
-
 					sr.collapse( true );
 					sel.addRange( sr );
+					data=null;
 				}
-				_dom.html.focus();
+
+				//_dom.html.focus();
 			}
 			w._logWebSocket.onopen = function( ev ) {
 				_dom.log.innerHTML += 'Connected<br/>';
@@ -226,7 +221,17 @@ window.location.parseSearch = function () {
 		<div id="cursorPos"></div>
 		<div id="html" contenteditable="true"></div>
 		<div id="text"></div>
+
 	</div>
+</div>
+
+
+<div id ="1">
+	<div id ="left">1</div>
+	<div id = "right">2</div>
+</div>
+<div id ="2">
+	<div id="main">3</div>
 </div>
 <script type="application/javascript"> window._endBody = true; </script>
 </body>
